@@ -18,22 +18,29 @@ public class AuthController {
 
     private final AuthenticationManager authManager;
     private final JwtService jwt;
+    private final AuthService authService;
 
     public record LoginRequest(String usernameOrEmail, String password) {}
     public record TokenResponse(String token) {}
-    public record ErrorResponse(String message) {}
-
+    public record RegisterRequest(
+            @jakarta.validation.constraints.Email String email,
+            @jakarta.validation.constraints.NotBlank String username,
+            @jakarta.validation.constraints.Size(min = 8, max = 72) String password
+    ){}
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        try {
             var auth = new UsernamePasswordAuthenticationToken(req.usernameOrEmail(), req.password());
             var result = authManager.authenticate(auth);
             var token = jwt.generate(result.getName(), Map.of("scope","USER"));
             return ResponseEntity.ok(new TokenResponse(token));
-        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
-            return ResponseEntity.status(404).body(new ErrorResponse("User not found"));
-        } catch (org.springframework.security.authentication.BadCredentialsException ex) {
-            return ResponseEntity.status(401).body(new ErrorResponse("Invalid credentials"));
-        }
+    }
+    
+    
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody @jakarta.validation.Valid  RegisterRequest req) {
+            var token = authService.registerAndIssueToken(req.email(),req.username(),req.password);
+            //return ResponseEntity.status(201).body(new TokenResponse(token));
+            return  ResponseEntity.status(201).body("Register successful");
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.print.DocFlavor;
 import java.util.Map;
 
 @Service
@@ -15,10 +16,16 @@ public class AuthService {
 
     private final AuthenticationManager authManager;
     private final JwtService jwt;
+    private final UserService userService;
 
     public String loginAndIssueToken(String usernameOrEmail, String rawPassword) {
         Authentication auth = new UsernamePasswordAuthenticationToken(usernameOrEmail, rawPassword);
         Authentication result = authManager.authenticate(auth); // valida con UDS + BCrypt
         return jwt.generate(result.getName(), Map.of("scope", "USER"));
+    }
+    
+    public String registerAndIssueToken(String email,String username, String rawPassword) {
+        var user = userService.register(email, username, rawPassword);
+        return jwt.generate(username, Map.of("scope", "USER"));
     }
 }
