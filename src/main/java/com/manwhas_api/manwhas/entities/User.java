@@ -1,6 +1,8 @@
 package com.manwhas_api.manwhas.entities;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -12,6 +14,7 @@ import java.util.UUID;
 public class User {
     @Id
     @Column(columnDefinition = "uuid")
+    @Generated(GenerationTime.INSERT)
     private UUID id; // lo genera Postgres 
 
     @Column(nullable = false, unique = true, length = 255)
